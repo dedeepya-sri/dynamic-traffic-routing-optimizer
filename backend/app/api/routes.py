@@ -7,6 +7,11 @@ from app.services.routing_service import (
     get_astar_route
 )
 
+from app.services.traffic_service import (
+    simulate_traffic,
+    get_traffic_status
+)
+
 from app.models.schemas import (
     GraphResponse,
     RouteRequest
@@ -20,6 +25,7 @@ router = APIRouter()
 
 @router.get("/test")
 def test_route():
+
     return {
         "message": "API routes working"
     }
@@ -34,29 +40,43 @@ def fetch_graph():
     return get_graph_data()
 
 # -----------------------------------
-# DIJKSTRA SHORTEST PATH
+# DIJKSTRA ROUTE
 # -----------------------------------
 
 @router.post("/shortest-path")
 def shortest_path(request: RouteRequest):
 
-    result = get_dijkstra_route(
+    return get_dijkstra_route(
         request.source,
         request.destination
     )
 
-    return result
-
 # -----------------------------------
-# A* OPTIMIZED PATH
+# A* ROUTE
 # -----------------------------------
 
 @router.post("/optimized-path")
 def optimized_path(request: RouteRequest):
 
-    result = get_astar_route(
+    return get_astar_route(
         request.source,
         request.destination
     )
 
-    return result
+# -----------------------------------
+# SIMULATE TRAFFIC
+# -----------------------------------
+
+@router.post("/simulate-traffic")
+def simulate():
+
+    return simulate_traffic()
+
+# -----------------------------------
+# GET TRAFFIC STATUS
+# -----------------------------------
+
+@router.get("/traffic-status")
+def traffic_status():
+
+    return get_traffic_status()

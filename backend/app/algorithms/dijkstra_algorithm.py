@@ -2,62 +2,80 @@ import networkx as nx
 
 from app.data.graph_data import graph
 
+# -----------------------------------
+# DIJKSTRA ROUTING
+# -----------------------------------
+
 def calculate_dijkstra_path(source, destination):
+
     """
-    Calculate shortest path using Dijkstra Algorithm
+    Calculate shortest path using
+    traffic-aware weights
     """
 
     try:
-        # Calculate shortest path
+
+        # Create temporary graph
+        temp_graph = graph.copy()
+
+        # Update effective weights
+        for start, end, data in temp_graph.edges(data=True):
+
+            effective_weight = (
+                data["weight"] * data["traffic"]
+            )
+
+            data["effective_weight"] = effective_weight
+
+        # Find shortest path
         path = nx.dijkstra_path(
-            graph,
+            temp_graph,
             source,
             destination,
-            weight="weight"
+            weight="effective_weight"
         )
 
-        # Calculate total distance
+        # Path distance
         total_distance = nx.dijkstra_path_length(
-            graph,
+            temp_graph,
             source,
             destination,
-            weight="weight"
+            weight="effective_weight"
         )
 
-        # Calculate estimated travel time
-        estimated_time = total_distance * 2
+        estimated_time = round(total_distance * 2, 2)
 
-        # Calculate congestion level
         congestion = calculate_congestion(path)
 
         return {
             "algorithm": "Dijkstra",
             "path": path,
-            "distance": total_distance,
+            "distance": round(total_distance, 2),
             "estimated_time": estimated_time,
             "congestion_level": congestion
         }
 
     except nx.NetworkXNoPath:
+
         return {
             "error": "No path found"
         }
 
     except Exception as error:
+
         return {
             "error": str(error)
         }
 
+# -----------------------------------
+# CONGESTION CALCULATION
+# -----------------------------------
 
 def calculate_congestion(path):
-    """
-    Calculate average congestion on selected path
-    """
 
     total_traffic = 0
     edge_count = 0
 
-    # Loop through path edges
     for i in range(len(path) - 1):
 
         start = path[i]

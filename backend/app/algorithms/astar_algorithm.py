@@ -8,10 +8,6 @@ from app.data.graph_data import graph
 # -----------------------------------
 
 def heuristic(node1, node2):
-    """
-    Estimate distance between two nodes
-    using Euclidean distance
-    """
 
     pos1 = graph.nodes[node1]["pos"]
     pos2 = graph.nodes[node2]["pos"]
@@ -22,54 +18,62 @@ def heuristic(node1, node2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 # -----------------------------------
-# A* PATH CALCULATION
+# A* ROUTING
 # -----------------------------------
 
 def calculate_astar_path(source, destination):
-    """
-    Calculate optimized path using A* Algorithm
-    """
 
     try:
 
-        # Find path
+        # Create temporary graph
+        temp_graph = graph.copy()
+
+        # Update effective weights
+        for start, end, data in temp_graph.edges(data=True):
+
+            effective_weight = (
+                data["weight"] * data["traffic"]
+            )
+
+            data["effective_weight"] = effective_weight
+
+        # Calculate optimized path
         path = nx.astar_path(
-            graph,
+            temp_graph,
             source,
             destination,
             heuristic=heuristic,
-            weight="weight"
+            weight="effective_weight"
         )
 
-        # Calculate path length
         total_distance = nx.astar_path_length(
-            graph,
+            temp_graph,
             source,
             destination,
             heuristic=heuristic,
-            weight="weight"
+            weight="effective_weight"
         )
 
-        # Estimated travel time
-        estimated_time = total_distance * 1.8
+        estimated_time = round(total_distance * 1.8, 2)
 
-        # Congestion level
         congestion = calculate_congestion(path)
 
         return {
             "algorithm": "A*",
             "path": path,
-            "distance": total_distance,
+            "distance": round(total_distance, 2),
             "estimated_time": estimated_time,
             "congestion_level": congestion
         }
 
     except nx.NetworkXNoPath:
+
         return {
             "error": "No path found"
         }
 
     except Exception as error:
+
         return {
             "error": str(error)
         }
