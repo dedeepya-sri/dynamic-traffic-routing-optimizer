@@ -1,7 +1,13 @@
 from fastapi import APIRouter
 
 from app.services.graph_service import get_graph_data
-from app.models.schemas import GraphResponse
+from app.services.routing_service import get_dijkstra_route
+
+from app.models.schemas import (
+    GraphResponse,
+    RouteRequest,
+    RouteResponse
+)
 
 router = APIRouter()
 
@@ -16,9 +22,23 @@ def test_route():
     }
 
 # -----------------------------------
-# GET GRAPH DATA
+# GET GRAPH
 # -----------------------------------
 
 @router.get("/graph", response_model=GraphResponse)
 def fetch_graph():
     return get_graph_data()
+
+# -----------------------------------
+# DIJKSTRA ROUTE
+# -----------------------------------
+
+@router.post("/shortest-path")
+def shortest_path(request: RouteRequest):
+
+    result = get_dijkstra_route(
+        request.source,
+        request.destination
+    )
+
+    return result
