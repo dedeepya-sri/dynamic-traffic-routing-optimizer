@@ -59,3 +59,51 @@ export const getTrafficStatus = async () => {
 
   return response.data;
 };
+
+// -----------------------------------
+// REAL DIJKSTRA ROUTING
+// -----------------------------------
+
+export const getRealShortestPath = async (
+  sourceLat,
+  sourceLon,
+  destLat,
+  destLon
+) => {
+
+  const response = await API.post(
+    "/real-shortest-path",
+    {
+      source_lat: sourceLat,
+      source_lon: sourceLon,
+      dest_lat: destLat,
+      dest_lon: destLon,
+    }
+  );
+
+  return response.data;
+};
+
+// -----------------------------------
+// REAL A* ROUTING
+// -----------------------------------
+
+export const getRealOptimizedPath = async (
+  sourceLat,
+  sourceLon,
+  destLat,
+  destLon
+) => {
+
+  const response = await API.post(
+    "/real-optimized-path",
+    {
+      source_lat: sourceLat,
+      source_lon: sourceLon,
+      dest_lat: destLat,
+      dest_lon: destLon,
+    }
+  );
+
+  return response.data;
+};

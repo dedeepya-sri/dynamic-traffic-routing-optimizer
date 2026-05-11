@@ -37,3 +37,16 @@ class RouteResponse(BaseModel):
     distance: float
     estimated_time: float
     congestion_level: float
+
+
+# -----------------------------------
+# REAL ROUTING REQUEST
+# -----------------------------------
+
+class RealRouteRequest(BaseModel):
+
+    source_lat: float
+    source_lon: float
+
+    dest_lat: float
+    dest_lon: float

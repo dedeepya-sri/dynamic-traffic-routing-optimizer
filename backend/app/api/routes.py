@@ -16,6 +16,14 @@ from app.models.schemas import (
     GraphResponse,
     RouteRequest
 )
+from app.services.real_routing_service import (
+    calculate_real_dijkstra,
+    calculate_real_astar
+)
+
+from app.models.schemas import (
+    RealRouteRequest
+)
 
 router = APIRouter()
 
@@ -80,3 +88,35 @@ def simulate():
 def traffic_status():
 
     return get_traffic_status()
+
+# -----------------------------------
+# REAL DIJKSTRA ROUTING
+# -----------------------------------
+
+@router.post("/real-shortest-path")
+def real_shortest_path(
+    request: RealRouteRequest
+):
+
+    return calculate_real_dijkstra(
+        request.source_lat,
+        request.source_lon,
+        request.dest_lat,
+        request.dest_lon
+    )
+
+# -----------------------------------
+# REAL A* ROUTING
+# -----------------------------------
+
+@router.post("/real-optimized-path")
+def real_optimized_path(
+    request: RealRouteRequest
+):
+
+    return calculate_real_astar(
+        request.source_lat,
+        request.source_lon,
+        request.dest_lat,
+        request.dest_lon
+    )

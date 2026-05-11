@@ -1,4 +1,5 @@
 import networkx as nx
+import time
 
 from app.data.graph_data import graph
 
@@ -8,17 +9,15 @@ from app.data.graph_data import graph
 
 def calculate_dijkstra_path(source, destination):
 
-    """
-    Calculate shortest path using
-    traffic-aware weights
-    """
-
     try:
+
+        # Start timer
+        start_time = time.perf_counter()
 
         # Create temporary graph
         temp_graph = graph.copy()
 
-        # Update effective weights
+        # Apply traffic weights
         for start, end, data in temp_graph.edges(data=True):
 
             effective_weight = (
@@ -27,7 +26,7 @@ def calculate_dijkstra_path(source, destination):
 
             data["effective_weight"] = effective_weight
 
-        # Find shortest path
+        # Calculate path
         path = nx.dijkstra_path(
             temp_graph,
             source,
@@ -35,7 +34,7 @@ def calculate_dijkstra_path(source, destination):
             weight="effective_weight"
         )
 
-        # Path distance
+        # Distance
         total_distance = nx.dijkstra_path_length(
             temp_graph,
             source,
@@ -43,7 +42,17 @@ def calculate_dijkstra_path(source, destination):
             weight="effective_weight"
         )
 
-        estimated_time = round(total_distance * 2, 2)
+        # End timer
+        end_time = time.perf_counter()
+
+        execution_time = (
+            end_time - start_time
+        ) * 1000
+
+        estimated_time = round(
+            total_distance * 2,
+            2
+        )
 
         congestion = calculate_congestion(path)
 
@@ -52,7 +61,11 @@ def calculate_dijkstra_path(source, destination):
             "path": path,
             "distance": round(total_distance, 2),
             "estimated_time": estimated_time,
-            "congestion_level": congestion
+            "congestion_level": congestion,
+            "execution_time_ms": round(
+                execution_time,
+                4
+            )
         }
 
     except nx.NetworkXNoPath:
@@ -68,7 +81,7 @@ def calculate_dijkstra_path(source, destination):
         }
 
 # -----------------------------------
-# CONGESTION CALCULATION
+# CONGESTION
 # -----------------------------------
 
 def calculate_congestion(path):
@@ -89,6 +102,7 @@ def calculate_congestion(path):
     if edge_count == 0:
         return 0
 
-    average_traffic = total_traffic / edge_count
-
-    return round(average_traffic, 2)
+    return round(
+        total_traffic / edge_count,
+        2
+    )

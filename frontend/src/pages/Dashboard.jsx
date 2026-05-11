@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import RouteForm from "../components/RouteForm";
 import TrafficPanel from "../components/TrafficPanel";
-import StatsCard from "../components/StatsCard";
 import MapView from "../components/MapView";
+import ComparisonCard from "../components/ComparisonCard";
 
 import {
   fetchGraph,
@@ -15,9 +15,17 @@ import {
 
 function Dashboard() {
 
-  const [graphData, setGraphData] = useState(null);
+  const [graphData, setGraphData] =
+    useState(null);
 
-  const [routeData, setRouteData] = useState(null);
+  const [dijkstraData, setDijkstraData] =
+    useState(null);
+
+  const [astarData, setAstarData] =
+    useState(null);
+
+  const [activeRoute, setActiveRoute] =
+    useState(null);
 
   // -----------------------------------
   // LOAD GRAPH
@@ -44,46 +52,36 @@ function Dashboard() {
   };
 
   // -----------------------------------
-  // DIJKSTRA
+  // COMPARE ALGORITHMS
   // -----------------------------------
 
-  const handleDijkstra = async (
+  const handleCompare = async (
     source,
     destination
   ) => {
 
     try {
 
-      const data = await getShortestPath(
-        source,
-        destination
-      );
+      // Run both algorithms
+      const dijkstra =
+        await getShortestPath(
+          source,
+          destination
+        );
+        console.log(data);
 
-      setRouteData(data);
+      const astar =
+        await getOptimizedPath(
+          source,
+          destination
+        );
 
-    } catch (error) {
+      setDijkstraData(dijkstra);
 
-      console.error(error);
-    }
-  };
+      setAstarData(astar);
 
-  // -----------------------------------
-  // A*
-  // -----------------------------------
-
-  const handleAStar = async (
-    source,
-    destination
-  ) => {
-
-    try {
-
-      const data = await getOptimizedPath(
-        source,
-        destination
-      );
-
-      setRouteData(data);
+      // Default displayed route
+      setActiveRoute(astar);
 
     } catch (error) {
 
@@ -95,115 +93,69 @@ function Dashboard() {
   // TRAFFIC SIMULATION
   // -----------------------------------
 
-  const handleTrafficSimulation = async () => {
+  const handleTrafficSimulation =
+    async () => {
 
-    try {
+      try {
 
-      await simulateTraffic();
+        await simulateTraffic();
 
-      // Reload graph after traffic changes
-      await loadGraph();
+        await loadGraph();
 
-      alert("Traffic Updated Successfully");
+        alert(
+          "Traffic simulation updated"
+        );
 
-    } catch (error) {
+      } catch (error) {
 
-      console.error(error);
-    }
-  };
+        console.error(error);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
 
       <Navbar />
 
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        {/* LEFT PANEL */}
+        {/* LEFT SIDEBAR */}
         <div className="space-y-6">
 
           <RouteForm
-            onDijkstra={handleDijkstra}
-            onAStar={handleAStar}
+            onCompare={handleCompare}
           />
 
           <TrafficPanel
-            onSimulate={handleTrafficSimulation}
+            onSimulate={
+              handleTrafficSimulation
+            }
           />
-
-          {/* STATS */}
-          <div className="grid grid-cols-1 gap-4">
-
-            <StatsCard
-              title="Algorithm"
-              value={routeData?.algorithm || "-"}
-            />
-
-            <StatsCard
-              title="Distance"
-              value={routeData?.distance || "-"}
-            />
-
-            <StatsCard
-              title="Congestion"
-              value={routeData?.congestion_level || "-"}
-            />
-
-            <StatsCard
-              title="Estimated Time"
-              value={routeData?.estimated_time || "-"}
-            />
-
-          </div>
 
         </div>
 
-        {/* MAP PANEL */}
-        <div className="lg:col-span-2">
+        {/* MAP */}
+        <div className="lg:col-span-3">
 
           <MapView
             graphData={graphData}
-            routeData={routeData}
+            routeData={activeRoute}
           />
 
-          {/* ROUTE DETAILS */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mt-6">
+          {/* COMPARISON */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
 
-            <h2 className="text-2xl font-bold text-cyan-400 mb-4">
-              Route Result
-            </h2>
+            <ComparisonCard
+              title="Dijkstra Analysis"
+              data={dijkstraData}
+              color="text-cyan-400"
+            />
 
-            {routeData ? (
-
-              <div>
-
-                <p className="mb-3 text-lg">
-                  <span className="font-bold">
-                    Path:
-                  </span>{" "}
-
-                  {routeData.path.join(" → ")}
-                </p>
-
-                <p className="text-slate-300">
-                  Dynamic congestion-aware route
-                  generated using{" "}
-
-                  <span className="text-cyan-400 font-bold">
-                    {routeData.algorithm}
-                  </span>
-                </p>
-
-              </div>
-
-            ) : (
-
-              <p className="text-slate-400">
-                Select source and destination
-                to generate optimized route.
-              </p>
-
-            )}
+            <ComparisonCard
+              title="A* Analysis"
+              data={astarData}
+              color="text-purple-400"
+            />
 
           </div>
 

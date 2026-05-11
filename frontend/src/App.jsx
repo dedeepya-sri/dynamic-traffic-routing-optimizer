@@ -1,7 +1,10 @@
-import Dashboard from "./pages/Dashboard";
+import RealRoutingDashboard from "./pages/RealRoutingDashboard";
 
 function App() {
-  return <Dashboard />;
+
+  return (
+    <RealRoutingDashboard />
+  );
 }
 
 export default App;
