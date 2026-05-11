@@ -1,0 +1,14 @@
+# Python
+backend/venv/
+
+# Node
+frontend/node_modules/
+
+# Environment
+.env
+
+# Cache
+__pycache__/
+
+# Build
+dist/
