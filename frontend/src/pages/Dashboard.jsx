@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Navbar from "../components/Navbar";
 import RouteForm from "../components/RouteForm";
 import TrafficPanel from "../components/TrafficPanel";
 import StatsCard from "../components/StatsCard";
+import MapView from "../components/MapView";
 
 import {
+  fetchGraph,
   getShortestPath,
   getOptimizedPath,
   simulateTraffic
@@ -13,7 +15,33 @@ import {
 
 function Dashboard() {
 
+  const [graphData, setGraphData] = useState(null);
+
   const [routeData, setRouteData] = useState(null);
+
+  // -----------------------------------
+  // LOAD GRAPH
+  // -----------------------------------
+
+  useEffect(() => {
+
+    loadGraph();
+
+  }, []);
+
+  const loadGraph = async () => {
+
+    try {
+
+      const data = await fetchGraph();
+
+      setGraphData(data);
+
+    } catch (error) {
+
+      console.error(error);
+    }
+  };
 
   // -----------------------------------
   // DIJKSTRA
@@ -73,6 +101,9 @@ function Dashboard() {
 
       await simulateTraffic();
 
+      // Reload graph after traffic changes
+      await loadGraph();
+
       alert("Traffic Updated Successfully");
 
     } catch (error) {
@@ -88,7 +119,7 @@ function Dashboard() {
 
       <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Left Panel */}
+        {/* LEFT PANEL */}
         <div className="space-y-6">
 
           <RouteForm
@@ -100,12 +131,8 @@ function Dashboard() {
             onSimulate={handleTrafficSimulation}
           />
 
-        </div>
-
-        {/* Right Panel */}
-        <div className="lg:col-span-2">
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* STATS */}
+          <div className="grid grid-cols-1 gap-4">
 
             <StatsCard
               title="Algorithm"
@@ -122,10 +149,25 @@ function Dashboard() {
               value={routeData?.congestion_level || "-"}
             />
 
+            <StatsCard
+              title="Estimated Time"
+              value={routeData?.estimated_time || "-"}
+            />
+
           </div>
 
-          {/* Route Output */}
-          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+        </div>
+
+        {/* MAP PANEL */}
+        <div className="lg:col-span-2">
+
+          <MapView
+            graphData={graphData}
+            routeData={routeData}
+          />
+
+          {/* ROUTE DETAILS */}
+          <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 mt-6">
 
             <h2 className="text-2xl font-bold text-cyan-400 mb-4">
               Route Result
@@ -135,7 +177,7 @@ function Dashboard() {
 
               <div>
 
-                <p className="mb-2">
+                <p className="mb-3 text-lg">
                   <span className="font-bold">
                     Path:
                   </span>{" "}
@@ -143,12 +185,13 @@ function Dashboard() {
                   {routeData.path.join(" → ")}
                 </p>
 
-                <p className="mb-2">
-                  <span className="font-bold">
-                    Estimated Time:
-                  </span>{" "}
+                <p className="text-slate-300">
+                  Dynamic congestion-aware route
+                  generated using{" "}
 
-                  {routeData.estimated_time}
+                  <span className="text-cyan-400 font-bold">
+                    {routeData.algorithm}
+                  </span>
                 </p>
 
               </div>
@@ -156,7 +199,8 @@ function Dashboard() {
             ) : (
 
               <p className="text-slate-400">
-                Run an algorithm to see results
+                Select source and destination
+                to generate optimized route.
               </p>
 
             )}
