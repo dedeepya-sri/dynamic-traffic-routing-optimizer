@@ -107,3 +107,17 @@ export const getRealOptimizedPath = async (
 
   return response.data;
 };
+
+// -----------------------------------
+// SIMULATE REAL TRAFFIC
+// -----------------------------------
+
+export const simulateRealTraffic =
+  async () => {
+
+    const response = await API.post(
+      "/simulate-real-traffic"
+    );
+
+    return response.data;
+};

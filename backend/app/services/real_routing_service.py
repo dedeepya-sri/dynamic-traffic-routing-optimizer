@@ -1,22 +1,44 @@
 import networkx as nx
 import osmnx as ox
+import random
 
-from app.services.real_map_service import REAL_GRAPH
+from pyproj import Transformer
+
+from app.services.real_map_service import (
+    ORIGINAL_GRAPH,
+    PROJECTED_GRAPH
+)
 
 # -----------------------------------
-# GET NEAREST NODE
+# CREATE COORDINATE TRANSFORMER
+# -----------------------------------
+
+transformer = Transformer.from_crs(
+    "EPSG:4326",
+    PROJECTED_GRAPH.graph["crs"],
+    always_xy=True
+)
+
+# -----------------------------------
+# CONVERT GPS TO PROJECTED NODE
 # -----------------------------------
 
 def get_nearest_node(latitude, longitude):
 
-    return ox.distance.nearest_nodes(
-        REAL_GRAPH,
+    # Convert lat/lon into projected CRS
+    x, y = transformer.transform(
         longitude,
         latitude
     )
 
+    return ox.distance.nearest_nodes(
+        PROJECTED_GRAPH,
+        x,
+        y
+    )
+
 # -----------------------------------
-# CONVERT ROUTE TO COORDINATES
+# CONVERT ROUTE TO LAT/LON
 # -----------------------------------
 
 def route_to_coordinates(route):
@@ -25,7 +47,7 @@ def route_to_coordinates(route):
 
     for node in route:
 
-        node_data = REAL_GRAPH.nodes[node]
+        node_data = ORIGINAL_GRAPH.nodes[node]
 
         coordinates.append([
             node_data["y"],
@@ -33,6 +55,30 @@ def route_to_coordinates(route):
         ])
 
     return coordinates
+
+# -----------------------------------
+# CREATE TRAFFIC GRAPH
+# -----------------------------------
+
+def create_traffic_graph():
+
+    temp_graph = PROJECTED_GRAPH.copy()
+
+    for u, v, key, data in temp_graph.edges(
+        keys=True,
+        data=True
+    ):
+
+        traffic = data.get(
+            "traffic",
+            1.0
+        )
+
+        data["effective_cost"] = (
+            data["length"] * traffic
+        )
+
+    return temp_graph
 
 # -----------------------------------
 # REAL DIJKSTRA
@@ -57,21 +103,20 @@ def calculate_real_dijkstra(
             dest_lon
         )
 
-        print("SOURCE NODE:", source_node)
-        print("DEST NODE:", destination_node)
+        temp_graph = create_traffic_graph()
 
         route = nx.shortest_path(
-            REAL_GRAPH,
+            temp_graph,
             source_node,
             destination_node,
-            weight="length"
+            weight="effective_cost"
         )
 
         distance = nx.shortest_path_length(
-            REAL_GRAPH,
+            temp_graph,
             source_node,
             destination_node,
-            weight="length"
+            weight="effective_cost"
         )
 
         coordinates = route_to_coordinates(
@@ -97,11 +142,11 @@ def calculate_real_dijkstra(
 
 def heuristic(node1, node2):
 
-    x1 = REAL_GRAPH.nodes[node1]["x"]
-    y1 = REAL_GRAPH.nodes[node1]["y"]
+    x1 = PROJECTED_GRAPH.nodes[node1]["x"]
+    y1 = PROJECTED_GRAPH.nodes[node1]["y"]
 
-    x2 = REAL_GRAPH.nodes[node2]["x"]
-    y2 = REAL_GRAPH.nodes[node2]["y"]
+    x2 = PROJECTED_GRAPH.nodes[node2]["x"]
+    y2 = PROJECTED_GRAPH.nodes[node2]["y"]
 
     return (
         (x2 - x1)**2 +
@@ -131,20 +176,22 @@ def calculate_real_astar(
             dest_lon
         )
 
+        temp_graph = create_traffic_graph()
+
         route = nx.astar_path(
-            REAL_GRAPH,
+            temp_graph,
             source_node,
             destination_node,
             heuristic=heuristic,
-            weight="length"
+            weight="effective_cost"
         )
 
         distance = nx.astar_path_length(
-            REAL_GRAPH,
+            temp_graph,
             source_node,
             destination_node,
             heuristic=heuristic,
-            weight="length"
+            weight="effective_cost"
         )
 
         coordinates = route_to_coordinates(
@@ -163,3 +210,30 @@ def calculate_real_astar(
         return {
             "error": str(error)
         }
+
+# -----------------------------------
+# SIMULATE TRAFFIC
+# -----------------------------------
+
+def simulate_real_traffic():
+
+    updated_edges = 0
+
+    for u, v, key, data in PROJECTED_GRAPH.edges(
+        keys=True,
+        data=True
+    ):
+
+        traffic = round(
+            random.uniform(1.0, 4.0),
+            2
+        )
+
+        data["traffic"] = traffic
+
+        updated_edges += 1
+
+    return {
+        "message": "Traffic updated",
+        "updated_roads": updated_edges
+    }

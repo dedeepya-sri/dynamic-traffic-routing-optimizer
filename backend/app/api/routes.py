@@ -18,7 +18,8 @@ from app.models.schemas import (
 )
 from app.services.real_routing_service import (
     calculate_real_dijkstra,
-    calculate_real_astar
+    calculate_real_astar,
+    simulate_real_traffic
 )
 
 from app.models.schemas import (
@@ -104,7 +105,14 @@ def real_shortest_path(
         request.dest_lat,
         request.dest_lon
     )
+# -----------------------------------
+# REAL TRAFFIC SIMULATION
+# -----------------------------------
 
+@router.post("/simulate-real-traffic")
+def simulate_traffic():
+
+    return simulate_real_traffic()
 # -----------------------------------
 # REAL A* ROUTING
 # -----------------------------------

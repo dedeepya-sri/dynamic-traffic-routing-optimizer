@@ -6,7 +6,8 @@ import RealMapView from "../components/RealMapView";
 
 import {
   getRealShortestPath,
-  getRealOptimizedPath
+  getRealOptimizedPath,
+  simulateRealTraffic
 } from "../services/api";
 
 function RealRoutingDashboard() {
@@ -52,6 +53,29 @@ function RealRoutingDashboard() {
       console.error(error);
     }
   };
+
+  // -----------------------------------
+// SIMULATE TRAFFIC
+// -----------------------------------
+
+const simulateTraffic = async () => {
+
+  try {
+
+    const data =
+      await simulateRealTraffic();
+
+    console.log(data);
+
+    alert(
+      "Traffic congestion updated"
+    );
+
+  } catch (error) {
+
+    console.error(error);
+  }
+};
 
   // -----------------------------------
   // REAL A*
@@ -137,6 +161,20 @@ function RealRoutingDashboard() {
               >
                 Run Real A*
               </button>
+
+              <button
+  onClick={simulateTraffic}
+  className="
+    w-full
+    bg-red-500
+    hover:bg-red-600
+    py-3
+    rounded-xl
+    font-bold
+  "
+>
+  Simulate Traffic
+</button>
 
             </div>
 
