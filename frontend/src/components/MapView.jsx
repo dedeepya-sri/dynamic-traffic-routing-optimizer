@@ -8,7 +8,9 @@ import {
 
 function MapView({
   graphData,
-  routeData
+  routeData,
+  comparisonRoutes,
+  recommendedAlgorithm
 }) {
 
   // Default map center
@@ -34,6 +36,16 @@ function MapView({
   const routeCoordinates = routeData?.path?.map(
     (nodeId) => getNodePosition(nodeId)
   ) || [];
+  const hasComparisonRoutes =
+    comparisonRoutes?.some(
+      (route) => route?.path?.length > 0
+    );
+
+  const getRouteCoordinates = (route) => (
+    route?.path?.map(
+      (nodeId) => getNodePosition(nodeId)
+    ).filter(Boolean) || []
+  );
 
   return (
     <div className="h-[700px] rounded-xl overflow-hidden border border-slate-700">
@@ -112,15 +124,43 @@ function MapView({
         })}
 
         {/* ----------------------------------- */}
+        {/* COMPARED ROUTES */}
+        {/* ----------------------------------- */}
+
+        {comparisonRoutes?.map((route) => {
+
+          const coordinates = getRouteCoordinates(route);
+
+          if (coordinates.length === 0) {
+            return null;
+          }
+
+          const isRecommended =
+            route.algorithm === recommendedAlgorithm;
+
+          return (
+            <Polyline
+              key={route.algorithm}
+              positions={coordinates}
+              pathOptions={{
+                color: isRecommended ? "blue" : "red",
+                weight: isRecommended ? 8 : 5,
+                opacity: isRecommended ? 0.95 : 0.75,
+                dashArray: isRecommended ? null : "8 8"
+              }}
+            />
+          );
+        })}
+
         {/* ACTIVE ROUTE */}
         {/* ----------------------------------- */}
 
-        {routeCoordinates.length > 0 && (
+        {!hasComparisonRoutes && routeCoordinates.length > 0 && (
 
           <Polyline
             positions={routeCoordinates}
             pathOptions={{
-              color: "cyan",
+              color: "blue",
               weight: 8
             }}
           />

@@ -2,10 +2,34 @@ import {
   MapContainer,
   TileLayer,
   Marker,
+  Polygon,
   Polyline,
   Popup,
   useMapEvents
 } from "react-leaflet";
+
+const SERVICE_AREA = {
+  north: 16.3337,
+  south: 16.2797,
+  east: 80.4645,
+  west: 80.4085
+};
+
+const SERVICE_AREA_POLYGON = [
+  [SERVICE_AREA.north, SERVICE_AREA.west],
+  [SERVICE_AREA.north, SERVICE_AREA.east],
+  [SERVICE_AREA.south, SERVICE_AREA.east],
+  [SERVICE_AREA.south, SERVICE_AREA.west]
+];
+
+function isInsideServiceArea(lat, lng) {
+  return (
+    lat >= SERVICE_AREA.south &&
+    lat <= SERVICE_AREA.north &&
+    lng >= SERVICE_AREA.west &&
+    lng <= SERVICE_AREA.east
+  );
+}
 
 // -----------------------------------
 // CLICK HANDLER
@@ -23,6 +47,13 @@ function ClickHandler({
     click(e) {
 
       const { lat, lng } = e.latlng;
+
+      if (!isInsideServiceArea(lat, lng)) {
+        alert(
+          "Please select locations inside the marked Guntur service area."
+        );
+        return;
+      }
 
       // First click = source
       if (!source) {
@@ -60,11 +91,17 @@ function RealMapView({
   destination,
   setSource,
   setDestination,
-  routeCoordinates
+  routeCoordinates,
+  comparisonRoutes,
+  recommendedAlgorithm
 }) {
 
   // Guntur center
   const center = [16.3067, 80.4365];
+  const hasComparisonRoutes =
+    comparisonRoutes?.some(
+      (route) => route?.route_coordinates?.length > 0
+    );
 
   return (
 
@@ -80,6 +117,18 @@ function RealMapView({
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+
+        {/* GUNTUR SERVICE AREA */}
+        <Polygon
+          positions={SERVICE_AREA_POLYGON}
+          interactive={false}
+          pathOptions={{
+            color: "#4a2c14",
+            weight: 5,
+            fillColor: "#7c4a20",
+            fillOpacity: 0.08
+          }}
         />
 
         {/* CLICK EVENTS */}
@@ -116,14 +165,38 @@ function RealMapView({
 
         )}
 
-        {/* ROUTE DRAWING */}
-        {routeCoordinates?.length > 0 && (
+        {/* COMPARED ROUTES */}
+        {comparisonRoutes?.map((route) => {
+
+          if (!route?.route_coordinates?.length) {
+            return null;
+          }
+
+          const isRecommended =
+            route.algorithm === recommendedAlgorithm;
+
+          return (
+            <Polyline
+              key={route.algorithm}
+              positions={route.route_coordinates}
+              pathOptions={{
+                color: isRecommended ? "blue" : "red",
+                weight: isRecommended ? 8 : 5,
+                opacity: isRecommended ? 0.95 : 0.75,
+                dashArray: isRecommended ? null : "8 8"
+              }}
+            />
+          );
+        })}
+
+        {/* SINGLE ROUTE DRAWING */}
+        {!hasComparisonRoutes && routeCoordinates?.length > 0 && (
 
           <Polyline
             positions={routeCoordinates}
             pathOptions={{
-              color: "cyan",
-              weight: 6
+              color: "blue",
+              weight: 8
             }}
           />
 
