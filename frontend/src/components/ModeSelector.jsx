@@ -8,7 +8,6 @@ function ModeSelector({
     <div className="
       flex
       gap-4
-      mb-6
     ">
 
       {/* REAL MAP MODE */}
