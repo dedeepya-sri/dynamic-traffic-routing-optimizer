@@ -504,7 +504,7 @@ def calculate_real_dijkstra(
         ) * 1000
 
         return build_route_summary(
-            "Real Dijkstra",
+            "Dijkstra",
             route,
             temp_graph,
             execution_time_ms,
@@ -572,7 +572,7 @@ def calculate_real_astar(
         ) * 1000
 
         return build_route_summary(
-            "Real A*",
+            "A*",
             route,
             temp_graph,
             execution_time_ms,
