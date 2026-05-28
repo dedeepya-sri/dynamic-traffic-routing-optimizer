@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Navbar from "../components/Navbar";
 import RouteForm from "../components/RouteForm";
@@ -32,13 +32,7 @@ function Dashboard() {
   // LOAD GRAPH
   // -----------------------------------
 
-  useEffect(() => {
-
-    loadGraph();
-
-  }, []);
-
-  const loadGraph = async () => {
+  const loadGraph = useCallback(async () => {
 
     try {
 
@@ -48,9 +42,16 @@ function Dashboard() {
 
     } catch (error) {
 
-      console.error(error);
+        console.error(error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadGraph();
+
+  }, [loadGraph]);
 
   // -----------------------------------
   // COMPARE ALGORITHMS
