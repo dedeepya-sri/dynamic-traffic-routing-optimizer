@@ -6,6 +6,36 @@ import osmnx as ox
 _original_graph = None
 _projected_graph = None
 _lock = threading.Lock()
+_vizag_center = (17.6868, 83.2185)
+_vizag_radii_meters = [3000, 2000]
+
+ox.settings.use_cache = True
+ox.settings.timeout = 180
+
+
+def _load_vizag_graph():
+
+    last_error = None
+
+    for radius in _vizag_radii_meters:
+
+        try:
+            print(f"Loading Vizag road network ({radius}m radius)...")
+
+            return ox.graph_from_point(
+                _vizag_center,
+                dist=radius,
+                network_type="drive",
+                simplify=True
+            )
+
+        except Exception as error:
+            last_error = error
+            print(
+                f"Vizag graph load failed for {radius}m radius: {error}"
+            )
+
+    raise last_error
 
 
 def _build_graphs():
@@ -14,8 +44,7 @@ def _build_graphs():
         return
     with _lock:
         if _original_graph is None:
-            print("Loading road network...")
-            _original_graph = ox.graph_from_point((16.3067, 80.4365), dist=3000, network_type="drive")
+            _original_graph = _load_vizag_graph()
         if _projected_graph is None:
             _projected_graph = ox.project_graph(_original_graph)
             print("Projected road network loaded successfully")

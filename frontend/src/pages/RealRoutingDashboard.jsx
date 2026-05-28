@@ -255,11 +255,11 @@ function RealRoutingDashboard() {
             </h2>
 
             <div className="mb-4 text-sm text-slate-300">
-              Click two locations inside the marked Guntur service area.
+              Click two locations inside the marked Vizag service area.
             </div>
 
             <div className="mb-4 rounded-lg border border-amber-800 bg-amber-950/40 p-3 text-sm text-amber-100">
-              Demo scope: route snapping and OSM graph search are configured for the dark-brown Guntur boundary on the map.
+              Demo scope: route snapping and OSM graph search are configured for the dark-brown Vizag boundary on the map.
             </div>
 
             <div className="space-y-3">

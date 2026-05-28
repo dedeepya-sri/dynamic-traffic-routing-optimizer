@@ -9,10 +9,10 @@ import {
 } from "react-leaflet";
 
 const SERVICE_AREA = {
-  north: 16.3337,
-  south: 16.2797,
-  east: 80.4645,
-  west: 80.4085
+  north: 17.7140,
+  south: 17.6595,
+  east: 83.2470,
+  west: 83.1900
 };
 
 const SERVICE_AREA_POLYGON = [
@@ -50,7 +50,7 @@ function ClickHandler({
 
       if (!isInsideServiceArea(lat, lng)) {
         alert(
-          "Please select locations inside the marked Guntur service area."
+          "Please select locations inside the marked Vizag service area."
         );
         return;
       }
@@ -96,8 +96,8 @@ function RealMapView({
   recommendedAlgorithm
 }) {
 
-  // Guntur center
-  const center = [16.3067, 80.4365];
+  // Vizag center
+  const center = [17.6868, 83.2185];
   const hasComparisonRoutes =
     comparisonRoutes?.some(
       (route) => route?.route_coordinates?.length > 0
@@ -119,7 +119,7 @@ function RealMapView({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* GUNTUR SERVICE AREA */}
+        {/* VIZAG SERVICE AREA */}
         <Polygon
           positions={SERVICE_AREA_POLYGON}
           interactive={false}
