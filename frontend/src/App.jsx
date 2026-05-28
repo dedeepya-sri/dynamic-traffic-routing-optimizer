@@ -109,13 +109,22 @@ function App() {
   const [isHowToRunOpen, setIsHowToRunOpen] =
     useState(false);
 
+  const [theme, setTheme] =
+    useState("dark");
+
+  const isDarkMode =
+    theme === "dark";
+
   return (
 
-    <div className="
-      min-h-screen
-      bg-slate-950
-      text-white
-    ">
+    <div
+      data-theme={theme}
+      className="
+        min-h-screen
+        bg-slate-950
+        text-white
+      "
+    >
 
       <Navbar />
 
@@ -129,17 +138,28 @@ function App() {
             setCurrentMode={setCurrentMode}
           />
 
-          <div className="lg:text-right">
+          <div className="flex flex-col items-start gap-3 lg:items-end">
             <div className="mb-2 text-xs text-slate-400">
               Click here to know how to run
             </div>
 
-            <button
-              onClick={() => setIsHowToRunOpen(true)}
-              className="rounded-lg border border-cyan-500 bg-slate-900 px-4 py-2 text-sm font-bold text-cyan-300 hover:bg-slate-800"
-            >
-              How to run
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setIsHowToRunOpen(true)}
+                className="rounded-lg border border-cyan-500 bg-slate-900 px-4 py-2 text-sm font-bold text-cyan-300 hover:bg-slate-800"
+              >
+                How to run
+              </button>
+
+              <button
+                onClick={() => setTheme(
+                  isDarkMode ? "light" : "dark"
+                )}
+                className="rounded-lg border border-slate-600 bg-slate-900 px-4 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800"
+              >
+                {isDarkMode ? "Light mode" : "Dark mode"}
+              </button>
+            </div>
           </div>
 
         </div>
