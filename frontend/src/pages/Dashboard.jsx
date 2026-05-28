@@ -69,7 +69,6 @@ function Dashboard() {
           source,
           destination
         );
-        console.log(data);
 
       const astar =
         await getOptimizedPath(
@@ -77,12 +76,27 @@ function Dashboard() {
           destination
         );
 
-      setDijkstraData(dijkstra);
+      // Check for errors in responses
+      if (dijkstra.error) {
+        alert(`Dijkstra Error: ${dijkstra.error}`);
+        setDijkstraData(null);
+      } else {
+        setDijkstraData(dijkstra);
+      }
 
-      setAstarData(astar);
+      if (astar.error) {
+        alert(`A* Error: ${astar.error}`);
+        setAstarData(null);
+      } else {
+        setAstarData(astar);
+      }
 
       // Default displayed route
-      setActiveRoute(astar);
+      if (!astar.error) {
+        setActiveRoute(astar);
+      } else if (!dijkstra.error) {
+        setActiveRoute(dijkstra);
+      }
 
     } catch (error) {
 

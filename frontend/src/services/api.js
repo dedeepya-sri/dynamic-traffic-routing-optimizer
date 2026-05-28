@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Backend API base URL
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://dynamic-traffic-routing-optimizer-yq1j.onrender.com",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
 });
 
 // -----------------------------------

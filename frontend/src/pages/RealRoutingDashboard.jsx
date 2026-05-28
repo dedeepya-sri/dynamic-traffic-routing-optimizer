@@ -189,33 +189,28 @@ const simulateTraffic = async () => {
 
             {routeData ? (
 
-              <div className="space-y-3">
+              routeData.error ? (
+                <div className="text-red-400">Error: {routeData.error}</div>
+              ) : (
+                <div className="space-y-3">
 
-                <div>
-                  <span className="font-bold">
-                    Algorithm:
-                  </span>{" "}
+                  <div>
+                    <span className="font-bold">Algorithm:</span>{" "}
+                    {routeData.algorithm || "-"}
+                  </div>
 
-                  {routeData.algorithm}
+                  <div>
+                    <span className="font-bold">Distance:</span>{" "}
+                    {routeData.distance_meters !== undefined ? `${routeData.distance_meters} m` : "-"}
+                  </div>
+
+                  <div>
+                    <span className="font-bold">Route Nodes:</span>{" "}
+                    {routeData.node_count ?? "-"}
+                  </div>
+
                 </div>
-
-                <div>
-                  <span className="font-bold">
-                    Distance:
-                  </span>{" "}
-
-                  {routeData.distance_meters} m
-                </div>
-
-                <div>
-                  <span className="font-bold">
-                    Route Nodes:
-                  </span>{" "}
-
-                  {routeData.node_count}
-                </div>
-
-              </div>
+              )
 
             ) : (
 

@@ -22,7 +22,7 @@ function ComparisonCard({
         {title}
       </h2>
 
-      {data ? (
+      {data && !data.error ? (
 
         <div className="space-y-3">
 
@@ -73,7 +73,7 @@ function ComparisonCard({
       ) : (
 
         <p className="text-slate-400">
-          No data available
+          {data?.error ? `Error: ${data.error}` : "No data available"}
         </p>
 
       )}

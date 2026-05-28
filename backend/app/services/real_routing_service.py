@@ -1,5 +1,4 @@
 import networkx as nx
-import osmnx as ox
 import random
 
 from pyproj import Transformer
@@ -32,11 +31,30 @@ def get_nearest_node(latitude, longitude):
         latitude
     )
 
-    return ox.distance.nearest_nodes(
-        projected_graph,
-        x,
-        y
-    )
+    nearest_node = None
+    shortest_distance = float("inf")
+
+    for node, data in projected_graph.nodes(data=True):
+
+        node_x = data.get("x")
+        node_y = data.get("y")
+
+        if node_x is None or node_y is None:
+            continue
+
+        distance = (
+            (node_x - x) ** 2 +
+            (node_y - y) ** 2
+        )
+
+        if distance < shortest_distance:
+            shortest_distance = distance
+            nearest_node = node
+
+    if nearest_node is None:
+        raise ValueError("No routable map nodes found")
+
+    return nearest_node
 
 # -----------------------------------
 # CONVERT ROUTE TO LAT/LON

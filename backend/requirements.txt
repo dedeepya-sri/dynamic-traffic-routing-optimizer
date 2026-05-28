@@ -7,6 +7,7 @@ shapely
 rtree
 pandas
 numpy
+scipy
 requests
 python-multipart
 pydantic
