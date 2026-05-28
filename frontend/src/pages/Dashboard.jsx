@@ -6,6 +6,7 @@ import TrafficPanel from "../components/TrafficPanel";
 import MapView from "../components/MapView";
 import ComparisonCard from "../components/ComparisonCard";
 
+
 import {
   fetchGraph,
   getShortestPath,
