@@ -109,6 +109,30 @@ export const getRealOptimizedPath = async (
 };
 
 // -----------------------------------
+// REAL ROUTE COMPARISON
+// -----------------------------------
+
+export const getRealRouteComparison = async (
+  sourceLat,
+  sourceLon,
+  destLat,
+  destLon
+) => {
+
+  const response = await API.post(
+    "/real-route-comparison",
+    {
+      source_lat: sourceLat,
+      source_lon: sourceLon,
+      dest_lat: destLat,
+      dest_lon: destLon,
+    }
+  );
+
+  return response.data;
+};
+
+// -----------------------------------
 // SIMULATE REAL TRAFFIC
 // -----------------------------------
 
