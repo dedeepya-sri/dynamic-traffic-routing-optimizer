@@ -19,6 +19,7 @@ from app.models.schemas import (
 from app.services.real_routing_service import (
     calculate_real_dijkstra,
     calculate_real_astar,
+    calculate_real_comparison,
     simulate_real_traffic
 )
 
@@ -123,6 +124,22 @@ def real_optimized_path(
 ):
 
     return calculate_real_astar(
+        request.source_lat,
+        request.source_lon,
+        request.dest_lat,
+        request.dest_lon
+    )
+
+# -----------------------------------
+# REAL ROUTE COMPARISON
+# -----------------------------------
+
+@router.post("/real-route-comparison")
+def real_route_comparison(
+    request: RealRouteRequest
+):
+
+    return calculate_real_comparison(
         request.source_lat,
         request.source_lon,
         request.dest_lat,

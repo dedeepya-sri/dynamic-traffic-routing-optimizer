@@ -1,8 +1,21 @@
+import heapq
 import networkx as nx
 import math
 import time
 
 from app.data.graph_data import graph
+
+
+def reconstruct_path(previous_node, destination):
+
+    path = []
+    current = destination
+
+    while current is not None:
+        path.append(current)
+        current = previous_node.get(current)
+
+    return list(reversed(path))
 
 # -----------------------------------
 # HEURISTIC
@@ -20,6 +33,70 @@ def heuristic(node1, node2):
         (x2 - x1) ** 2 +
         (y2 - y1) ** 2
     )
+
+
+def run_instrumented_astar(temp_graph, source, destination):
+
+    distances = {
+        source: 0
+    }
+    previous_node = {
+        source: None
+    }
+    explored_nodes = set()
+    queue = [
+        (
+            heuristic(source, destination),
+            0,
+            source
+        )
+    ]
+
+    while queue:
+
+        _, current_distance, current_node = heapq.heappop(queue)
+
+        if current_node in explored_nodes:
+            continue
+
+        explored_nodes.add(current_node)
+
+        if current_node == destination:
+            return (
+                reconstruct_path(
+                    previous_node,
+                    destination
+                ),
+                current_distance,
+                len(explored_nodes)
+            )
+
+        for neighbor, edge_data in temp_graph[current_node].items():
+
+            new_distance = (
+                current_distance +
+                edge_data["effective_weight"]
+            )
+
+            if new_distance < distances.get(
+                neighbor,
+                float("inf")
+            ):
+                distances[neighbor] = new_distance
+                previous_node[neighbor] = current_node
+                heapq.heappush(
+                    queue,
+                    (
+                        new_distance + heuristic(
+                            neighbor,
+                            destination
+                        ),
+                        new_distance,
+                        neighbor
+                    )
+                )
+
+    raise nx.NetworkXNoPath
 
 # -----------------------------------
 # A* ROUTING
@@ -43,21 +120,10 @@ def calculate_astar_path(source, destination):
 
             data["effective_weight"] = effective_weight
 
-        # Calculate path
-        path = nx.astar_path(
+        path, total_distance, nodes_explored = run_instrumented_astar(
             temp_graph,
             source,
-            destination,
-            heuristic=heuristic,
-            weight="effective_weight"
-        )
-
-        total_distance = nx.astar_path_length(
-            temp_graph,
-            source,
-            destination,
-            heuristic=heuristic,
-            weight="effective_weight"
+            destination
         )
 
         # End timer
@@ -68,7 +134,7 @@ def calculate_astar_path(source, destination):
         ) * 1000
 
         estimated_time = round(
-            total_distance * 1.8,
+            total_distance * 2,
             2
         )
 
@@ -80,6 +146,7 @@ def calculate_astar_path(source, destination):
             "distance": round(total_distance, 2),
             "estimated_time": estimated_time,
             "congestion_level": congestion,
+            "nodes_explored": nodes_explored,
             "execution_time_ms": round(
                 execution_time,
                 4
