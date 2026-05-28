@@ -5,17 +5,18 @@ import random
 from pyproj import Transformer
 
 from app.services.real_map_service import (
-    ORIGINAL_GRAPH,
-    PROJECTED_GRAPH
+    get_original_graph,
+    get_projected_graph
 )
 
 # -----------------------------------
 # CREATE COORDINATE TRANSFORMER
 # -----------------------------------
 
+projected_graph = get_projected_graph()
 transformer = Transformer.from_crs(
     "EPSG:4326",
-    PROJECTED_GRAPH.graph["crs"],
+    projected_graph.graph["crs"],
     always_xy=True
 )
 
@@ -32,7 +33,7 @@ def get_nearest_node(latitude, longitude):
     )
 
     return ox.distance.nearest_nodes(
-        PROJECTED_GRAPH,
+        projected_graph,
         x,
         y
     )
@@ -43,11 +44,12 @@ def get_nearest_node(latitude, longitude):
 
 def route_to_coordinates(route):
 
+    original_graph = get_original_graph()
     coordinates = []
 
     for node in route:
 
-        node_data = ORIGINAL_GRAPH.nodes[node]
+        node_data = original_graph.nodes[node]
 
         coordinates.append([
             node_data["y"],
@@ -62,7 +64,7 @@ def route_to_coordinates(route):
 
 def create_traffic_graph():
 
-    temp_graph = PROJECTED_GRAPH.copy()
+    temp_graph = projected_graph.copy()
 
     for u, v, key, data in temp_graph.edges(
         keys=True,
@@ -142,11 +144,11 @@ def calculate_real_dijkstra(
 
 def heuristic(node1, node2):
 
-    x1 = PROJECTED_GRAPH.nodes[node1]["x"]
-    y1 = PROJECTED_GRAPH.nodes[node1]["y"]
+    x1 = projected_graph.nodes[node1]["x"]
+    y1 = projected_graph.nodes[node1]["y"]
 
-    x2 = PROJECTED_GRAPH.nodes[node2]["x"]
-    y2 = PROJECTED_GRAPH.nodes[node2]["y"]
+    x2 = projected_graph.nodes[node2]["x"]
+    y2 = projected_graph.nodes[node2]["y"]
 
     return (
         (x2 - x1)**2 +
@@ -219,7 +221,7 @@ def simulate_real_traffic():
 
     updated_edges = 0
 
-    for u, v, key, data in PROJECTED_GRAPH.edges(
+    for u, v, key, data in projected_graph.edges(
         keys=True,
         data=True
     ):
